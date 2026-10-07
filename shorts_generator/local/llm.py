@@ -18,7 +18,9 @@ def call_openai_llm(prompt: str) -> str:
             "    pip install -r requirements-local.txt"
         ) from e
 
-    client = OpenAI(api_key=require_openai_key())
+    import os
+    base_url = os.environ.get("OPENAI_BASE_URL")
+    client = OpenAI(api_key=require_openai_key(), base_url=base_url)
     response = client.chat.completions.create(
         model=OPENAI_MODEL,
         temperature=0.7,

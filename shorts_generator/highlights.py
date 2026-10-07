@@ -56,9 +56,13 @@ Rules:
 - {num_clips_instruction}
 - For each highlight, identify the single best "hook_sentence" — the opening line that would make someone stop scrolling
 - Explain in one sentence why this clip is viral ("virality_reason")
+- Provide metadata for Telegram:
+  - "telegram_title": Catchy title for the video.
+  - "telegram_description": A nice description for the video.
+  - "telegram_hashtags": A string of relevant hashtags (e.g. #viral #shorts).
 
 Respond ONLY with valid JSON (no markdown, no explanation):
-{{"highlights":[{{"title":"string","start_time":float,"end_time":float,"score":int,"hook_sentence":"string","virality_reason":"string"}}]}}"""
+{{"highlights":[{{"title":"string","start_time":float,"end_time":float,"score":int,"hook_sentence":"string","virality_reason":"string","telegram_title":"string","telegram_description":"string","telegram_hashtags":"string"}}]}}"""
 
 
 CHUNK_SIZE_SECONDS = 1200       # 20-min chunks for long videos
@@ -154,6 +158,9 @@ def _sanitize_highlights(raw_highlights: object, duration: float) -> List[Dict]:
                 "score": max(0, min(100, _coerce_int(item.get("score"), default=0))),
                 "hook_sentence": str(item.get("hook_sentence") or "").strip(),
                 "virality_reason": str(item.get("virality_reason") or "").strip(),
+                "telegram_title": str(item.get("telegram_title") or "").strip(),
+                "telegram_description": str(item.get("telegram_description") or "").strip(),
+                "telegram_hashtags": str(item.get("telegram_hashtags") or "").strip(),
             }
         )
 
@@ -300,6 +307,7 @@ def get_highlights(
         highlights = dedupe_highlights(all_highlights)
     else:
         text = build_transcript_text(transcript)
+        print(f"[highlights] asking AI to extract {num_clips} clips with Telegram metadata (this may take a few minutes)...", flush=True)
         result = call_highlight_api(text, content_info, duration, num_clips=num_clips, llm_fn=llm_fn)
         highlights = dedupe_highlights(result.get("highlights", []))
 
