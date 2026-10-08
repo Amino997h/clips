@@ -104,6 +104,8 @@ def _parse_json_loose(raw: str) -> Dict:
     text = raw.strip()
     text = re.sub(r"^```(?:json)?\s*", "", text)
     text = re.sub(r"\s*```$", "", text)
+    # Fix markdown escaping from some ChatGPT clients
+    text = text.replace(r"\_", "_").replace(r"\{", "{").replace(r"\}", "}").replace(r"\[", "[").replace(r"\]", "]").replace(r"\(", "(").replace(r"\)", ")")
     try:
         return json.loads(text)
     except json.JSONDecodeError:
